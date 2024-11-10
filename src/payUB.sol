@@ -11,7 +11,7 @@ contract PayUB is Conversion {
     address public owner;
     address[] studentsBilled;
     mapping(address => uint256) public billsToPay;
-    address ethUSDPriceFeed = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
+    address ethUSDPriceFeed; // = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
     uint8 constant USD_DECIMALS = 2;
 
 
@@ -22,8 +22,9 @@ contract PayUB is Conversion {
 
     event billAdded(address indexed student, uint256 amount);
 
-    constructor() Conversion(ethUSDPriceFeed,USD_DECIMALS) {
+    constructor(address _priceFeed) Conversion(_priceFeed,USD_DECIMALS) {
         owner = msg.sender;
+        ethUSDPriceFeed = _priceFeed;
     }
 
     function addBill(address _student, uint256 _billAmount) external OnlyOwner {

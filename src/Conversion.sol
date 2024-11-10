@@ -1,20 +1,32 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.13;
 
-import {Test,console} from 'forge-std/Test.sol';
-import {Conversion} from '../src/Conversion.sol';
 
-contract TestConversion is Test, Conversion {
+import {AggregatorV3Interface} from "chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-    constructor() Conversion(0x694AA1769357215DE4FAC081bf1f309aDC325306,2) {
+contract Conversion {
+    uint8 public decimals = 8;
+    AggregatorV3Interface priceFeed;
+
+    constructor(address _priceFeed, uint8 _decimals) {
+        priceFeed = AggregatorV3Interface(_priceFeed);
+        decimals = _decimals;
     }
 
-    function test_00_Conversion() public view {
-        uint256 price = getPrice();
-        console.log("Price",price);
-        uint256 ethAmount = getConversionRate(10 ether);
-        uint256 ethAmountInUSD = (price * 10 ether)/10**18;
-        ethAmountInUSD = ethAmountInUSD/10**(18-2);
-        assertEq(ethAmount, ethAmountInUSD);
+    function getConversionRate(uint256 ethAmount) internal view returns (uint256) {
+        uint256 ethPrice = getPrice();
+        uint precision = 10**(18-decimals);
+
+        uint256 ethAmountInUSD = (ethPrice* ethAmount)/ 10**18;
+
+        return ethAmountInUSD/precision;
+    }
+
+    function getPrice() internal view returns(uint256) {
+
+        (,int256 price,,,) = priceFeed.latestRoundData();
+        int256 multiplier = int256(10**(18-priceFeed.decimals()));
+        return uint256(price*multiplier);
     }
 }
