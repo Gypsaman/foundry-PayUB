@@ -25,7 +25,7 @@ contract PayUBTest is Test {
 
     function setUp() public {
         vm.prank(OWNER);
-        payUB = new PayUB();
+        payUB = new PayUB(STUDENT);
     }
 
     function test_01_Owner() public view {
